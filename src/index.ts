@@ -1,4 +1,4 @@
-import { isAddress } from 'ethers';
+import { isAddress, Eip1193Provider } from 'ethers';
 import {
   FhevmInstanceConfig,
   getChainId,
@@ -9,6 +9,7 @@ import {
   getProvider,
   getPublicParams,
   getTfheCompactPublicKey,
+  getFhevmInstanceConfigFromRelayer,
 } from './config';
 import {
   cleanURL,
@@ -74,6 +75,16 @@ export type FhevmInstance = {
     publicParamsId: string;
   } | null;
 };
+
+
+export const createInstanceFromRelayer = async (
+  url: string,
+  fhevm_chain_id: number,
+  public_key_id?: string | null,
+  network?: Eip1193Provider | string,
+) => {
+  return createInstance(await getFhevmInstanceConfigFromRelayer(url, fhevm_chain_id, public_key_id, network));
+}
 
 export const createInstance = async (
   config: FhevmInstanceConfig,
@@ -178,11 +189,11 @@ export const createInstance = async (
     getPublicKey: () =>
       publicKeyData.publicKey
         ? {
-            publicKey: publicKeyData.publicKey.safe_serialize(
-              SERIALIZED_SIZE_LIMIT_PK,
-            ),
-            publicKeyId: publicKeyData.publicKeyId,
-          }
+          publicKey: publicKeyData.publicKey.safe_serialize(
+            SERIALIZED_SIZE_LIMIT_PK,
+          ),
+          publicKeyId: publicKeyData.publicKeyId,
+        }
         : null,
     getPublicParams: (bits: keyof PublicParams) => {
       if (publicParamsData[bits]) {
