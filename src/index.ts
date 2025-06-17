@@ -77,16 +77,16 @@ export type FhevmInstance = {
 };
 
 export const createInstanceFromRelayer = async (
-  url: string,
-  fhevm_chain_id: number,
-  public_key_id?: string | null,
+  relayerUrl: string,
+  fhevmChainId: number,
+  publicKeyId?: string | null,
   network?: Eip1193Provider | string,
 ) => {
   return createInstance(
     await getFhevmInstanceConfigFromRelayer(
-      url,
-      fhevm_chain_id,
-      public_key_id,
+      relayerUrl,
+      fhevmChainId,
+      publicKeyId,
       network,
     ),
   );

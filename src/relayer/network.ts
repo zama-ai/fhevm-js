@@ -47,14 +47,14 @@ export type Keys = {
 
 const keyurlCache: { [key: string]: Keys } = {};
 export const getKeysFromRelayer = async (
-  url: string,
+  relayerUrl: string,
   publicKeyId?: string | null,
 ) => {
-  if (keyurlCache[url]) {
-    return keyurlCache[url];
+  if (keyurlCache[relayerUrl]) {
+    return keyurlCache[relayerUrl];
   }
   try {
-    const response = await fetch(`${url}/v1/keyurl`);
+    const response = await fetch(`${relayerUrl}/v1/keyurl`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -144,7 +144,7 @@ export const getKeysFromRelayer = async (
           },
         },
       };
-      keyurlCache[url] = result;
+      keyurlCache[relayerUrl] = result;
       return result;
     } else {
       throw new Error('No public key available');
@@ -169,20 +169,20 @@ export type Contracts = {
   status: string;
 };
 
-const contractsCache: { [chain_id: string]: Contracts } = {};
+const contractsCache: { [chainId: string]: Contracts } = {};
 
 export const getContractsFromRelayer = async (
-  url: string,
-  chain_id: string | number,
+  relayerUrl: string,
+  chainId: string | number,
 ) => {
   // Try cache for contracts
-  if (contractsCache[chain_id]) {
-    return contractsCache[chain_id];
+  if (contractsCache[chainId]) {
+    return contractsCache[chainId];
   }
 
   // Try fetching them from the Relayer
   try {
-    const response = await fetch(`${url}/v1/${chain_id}/contracts`);
+    const response = await fetch(`${relayerUrl}/v1/${chainId}/contracts`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
