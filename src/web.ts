@@ -5,6 +5,7 @@ export {
   HandleContractPair,
   FhevmInstance,
   createInstance,
+  createInstanceFromRelayer,
   EncryptionTypes,
   ENCRYPTION_TYPES,
   DecryptedResults,
@@ -14,4 +15,9 @@ export {
   EIP712Type,
 } from './index';
 
+export {
+  FhevmInstanceConfig,
+  getFhevmInstanceConfigFromRelayer,
+} from './config';
+export { getContractsFromRelayer, getKeysFromRelayer } from './relayer/network';
 export { initFhevm, TFHEInput, KMSInput } from './init';
