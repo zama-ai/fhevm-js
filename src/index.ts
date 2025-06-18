@@ -76,16 +76,22 @@ export type FhevmInstance = {
   } | null;
 };
 
+/**
+ * @param {string}  relayerUrl - Relayer's URL.
+ * @param {number} chainId - FHEVM host chain id.
+ * @param {string=} [publicKeyId] - Optional public key id.
+ * @param {Eip1193Provider | string} [network] - Optional network.
+ */
 export const createInstanceFromRelayer = async (
   relayerUrl: string,
-  fhevmChainId: number,
+  chainId: number,
   publicKeyId?: string | null,
   network?: Eip1193Provider | string,
 ) => {
   return createInstance(
     await getFhevmInstanceConfigFromRelayer(
       relayerUrl,
-      fhevmChainId,
+      chainId,
       publicKeyId,
       network,
     ),

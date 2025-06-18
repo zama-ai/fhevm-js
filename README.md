@@ -1,5 +1,9 @@
 <p align="center">
-<img width=600 src="https://github.com/user-attachments/assets/6173e401-7c1b-4911-9731-ca2eb436e85f" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/.gitbook/assets/fhevm-header-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/.gitbook/assets/fhevm-header-light.png">
+  <img width=500 alt="fhevm">
+</picture>
 </p>
 <hr/>
 <p align="center">
