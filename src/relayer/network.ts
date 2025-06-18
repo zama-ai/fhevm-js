@@ -34,16 +34,27 @@ export type RelayerKeys = {
   status: string;
 };
 
-const keyurlCache: { [key: string]: any } = {};
+export type Keys = {
+  publicKey: TfheCompactPublicKey;
+  publicKeyId: string;
+  publicParams: {
+    [n_bits: number]: {
+      publicParams: CompactPkeCrs;
+      publicParamsId: string;
+    };
+  };
+};
+
+const keyurlCache: { [key: string]: Keys } = {};
 export const getKeysFromRelayer = async (
-  url: string,
+  relayerUrl: string,
   publicKeyId?: string | null,
 ) => {
-  if (keyurlCache[url]) {
-    return keyurlCache[url];
+  if (keyurlCache[relayerUrl]) {
+    return keyurlCache[relayerUrl];
   }
   try {
-    const response = await fetch(`${url}/v1/keyurl`);
+    const response = await fetch(`${relayerUrl}/v1/keyurl`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -123,7 +134,7 @@ export const getKeysFromRelayer = async (
         });
       }
 
-      const result = {
+      const result: Keys = {
         publicKey: pub_key,
         publicKeyId,
         publicParams: {
@@ -133,11 +144,53 @@ export const getKeysFromRelayer = async (
           },
         },
       };
-      keyurlCache[url] = result;
+      keyurlCache[relayerUrl] = result;
       return result;
     } else {
       throw new Error('No public key available');
     }
+  } catch (e) {
+    throw new Error('Impossible to fetch public key: wrong relayer url.', {
+      cause: e,
+    });
+  }
+};
+
+export type Contracts = {
+  response: {
+    verifyingContractAddressDecryption: string;
+    verifyingContractAddressInputVerification: string;
+    kmsContractAddress: string;
+    inputVerifierContractAddress: string;
+    aclContractAddress: string;
+    decryptionOracle: string;
+    gatewayChainId: number;
+  };
+  status: string;
+};
+
+const contractsCache: { [chainId: string]: Contracts } = {};
+
+export const getContractsFromRelayer = async (
+  relayerUrl: string,
+  chainId: string | number,
+) => {
+  // Try cache for contracts
+  if (contractsCache[chainId]) {
+    return contractsCache[chainId];
+  }
+
+  // Try fetching them from the Relayer
+  try {
+    const response = await fetch(`${relayerUrl}/v1/${chainId}/contracts`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    if (response.status != 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data: Contracts = await response.json();
+    return data;
   } catch (e) {
     throw new Error('Impossible to fetch public key: wrong relayer url.', {
       cause: e,

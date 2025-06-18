@@ -6,7 +6,7 @@ import {
   Provider,
 } from 'ethers';
 import { PublicParams } from './sdk/encrypt';
-import { getKeysFromRelayer } from './relayer/network';
+import { getKeysFromRelayer, getContractsFromRelayer } from './relayer/network';
 import {
   cleanURL,
   SERIALIZED_SIZE_LIMIT_PK,
@@ -170,4 +170,51 @@ export const getCoprocessorSignersThreshold = async (
   );
   const threshold: bigint = await inputContract.getThreshold();
   return Number(threshold); // threshold is always supposed to fit in a number
+};
+
+const configCache: { [chainId: string]: FhevmInstanceConfig } = {};
+
+/**
+ * @param {string}  relayerUrl - Relayer's URL.
+ * @param {number} chainId - FHEVM host chain id.
+ * @param {string=} [publicKeyId] - Optional public key id.
+ * @param {Eip1193Provider | string} [network] - Optional network.
+ */
+export const getFhevmInstanceConfigFromRelayer = async (
+  relayerUrl: string,
+  chainId: number,
+  publicKeyId?: string | null,
+  network?: Eip1193Provider | string,
+) => {
+  // Try cache for configuration
+  if (configCache[chainId]) {
+    return configCache[chainId];
+  }
+
+  const [contracts, keys] = await Promise.all([
+    getContractsFromRelayer(relayerUrl, chainId),
+    getKeysFromRelayer(relayerUrl, publicKeyId),
+  ]);
+
+  let config: FhevmInstanceConfig = {
+    verifyingContractAddressDecryption:
+      contracts.response.verifyingContractAddressDecryption,
+    verifyingContractAddressInputVerification:
+      contracts.response.verifyingContractAddressInputVerification,
+    kmsContractAddress: contracts.response.kmsContractAddress,
+    inputVerifierContractAddress:
+      contracts.response.inputVerifierContractAddress,
+    aclContractAddress: contracts.response.aclContractAddress,
+    gatewayChainId: contracts.response.gatewayChainId,
+    chainId: chainId,
+    relayerUrl: relayerUrl,
+    network: network,
+    publicParams: keys.publicParams,
+    publicKey: {
+      data: keys.publicKey.safe_serialize(SERIALIZED_SIZE_LIMIT_PK),
+      id: keys.publicKeyId,
+    },
+  };
+  configCache[chainId] = config;
+  return config;
 };
